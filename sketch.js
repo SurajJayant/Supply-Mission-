@@ -1,86 +1,63 @@
-var bullet,wall;
-var speed,weight,thickness;
-var damage;
+var helicopterIMG, helicopterSprite, packageSprite,packageIMG;
+var packageBody,ground;
+var background,bgimg;
+const Engine = Matter.Engine;
+const World = Matter.World;
+const Bodies = Matter.Bodies;
+const Body = Matter.Body;
 
-var END=3;
-var PLAY=2;
-var START=1;
-var gamestate = 1;
+function preload(){
+	helicopterIMG = loadImage("helicopter.png");
+	packageIMG = loadImage("package.png");
+	bgimg = loadImage("bg.png");
+}
 
 function setup() {
-  createCanvas(1600,400);
-  speed=round(random(55,90));
-  weight=round(random(30,52));
-  thickness=round(random(223,321));
+	createCanvas(550, 700);
+	rectMode(CENTER);
+	
+    background = createSprite(540,335,30,30);
+	background.addImage(bgimg);
+	background.scale=2.5;
 
-  bullet=createSprite(50,200,50,10);
-  bullet.shapeColor=color(255,255,255);
+	packageSprite=createSprite(width/2, 80, 10,10);
+	packageSprite.addImage(packageIMG);
+	packageSprite.scale=0.2;
 
-  wall=createSprite(1200,200,thickness,height/2);
-  wall.shapeColor=color(80,80,80);
-  
+	helicopterSprite=createSprite(width/2, 200, 10,10);
+	helicopterSprite.addImage(helicopterIMG);
+	helicopterSprite.scale=0.6;
+
+	groundSprite=createSprite(width/2, height-35, width,10);
+	groundSprite.shapeColor=color(0,255,100)
+
+	engine = Engine.create();
+	world = engine.world;
+
+	packageBody = Bodies.circle(width/2 , 200 , 5 , {restitution:0.7, isStatic:true});
+	World.add(world, packageBody);
+	
+	ground = Bodies.rectangle(width/2, 650, width, 10 , {isStatic:true} );
+	 World.add(world, ground);
+	 
+
+	Engine.run(engine); 
 }
 
 function draw() {
-  background(0,0,0);
-
-  if(gamestate === START){
-    bullet.velocityX = 0;
-    fill(0,900,900);
-    textSize(20);
-    textFont("Kohinoor Devanagari");
-    text("P R E S S  S P A C E  T O  S T A R T",600,200);
+  rectMode(CENTER);
+  background.velocityX = -5;
+  if (background.x < -550){
+	background.x = 900;
   }
-
-  if(keyDown("space") && gamestate === START){
-    gamestate = PLAY;
-  }
- if(gamestate === PLAY){
-  bullet.velocityX = speed;
-  if(bullet.isTouching(wall) && gamestate === PLAY){
-    gamestate = END;
-  }
- }
-
- if(gamestate == END){
-   if(hascollided(bullet,wall)){
-    bullet.velocityX = 0;
-    damage=round(0.5*weight*speed*speed/thickness*thickness*thickness);
-   }
-
-   if(damage>10){
-    wall.shapeColor=color(255,0,0);
-   }
-   if(damage<10){
-    wall.shapeColor=color(0,255,0);
-   }
-   fill(0,900,900);
-   textSize(20);
-   textFont("Kohinoor Devanagari");
-   text("P R E S S  S P A C E  T O  R E S T A R T",600,200);
- }
-
- if(keyDown("space") && gamestate === END){
-   gamestate = PLAY;
-   bullet.x=50;
-   bullet.y=200;
-   wall.shapeColor=color(100,100,100);
-   speed=round(random(55,90));
-   weight=round(random(30,52));
-   thickness=round(random(223,321)); 
- }
- 
+  packageSprite.x= packageBody.position.x 
+  packageSprite.y= packageBody.position.y 
   
-  fill(0,900,900);
-  textSize(20);
-  textFont("Kohinoor Devanagari");
-  text("D A M A G E : "+damage,200,50);
-  text("S P E E D : "+speed,450,50);
-  text("W E I G H T : "+weight,600,50);
-  text("T H I C K N E S S : "+thickness,800,50);
-
-  
-
-
   drawSprites();
+}  
+
+function keyPressed() {
+ if (keyCode === DOWN_ARROW) {
+	Matter.Body.setStatic(packageBody,false);
+ }
 }
